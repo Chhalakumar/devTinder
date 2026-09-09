@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema(
     photoUrl: {
       type: String,
       default:
-        "https://www.hindustantimes.com/cricket/virat-kohli-a-great-test-batter-but-an-even-greater-captain-india-legends-records-that-are-near-impossible-to-break-101746850936348.html",
+        "https://i.guim.co.uk/img/media/90f3d9d62e357b22062397771403e115ec6e0f53/804_287_2486_1988/master/2486.jpg?width=1200&height=1200&quality=85&auto=format&fit=crop&s=55620d64ae0f9ae6918a3b7528ebf841",
       validate(value) {
         if (!validator.isURL(value)) {
           throw new Error("invalid photo url:" + value);
