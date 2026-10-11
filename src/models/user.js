@@ -92,4 +92,45 @@ userSchema.methods.validatePassword = async function (passwordInputByUser) {
   );
   return isPasswordValid;
 };
+
+// Cascade delete: Remove all connection requests when a user is deleted
+userSchema.pre('findOneAndDelete', async function(next) {
+  try {
+    const userId = this.getQuery()._id;
+    const ConnectionRequest = require('./connectionRequest');
+    
+    // Delete all connection requests involving this user
+    await ConnectionRequest.deleteMany({
+      $or: [
+        { fromUserId: userId },
+        { toUserId: userId }
+      ]
+    });
+    
+    console.log(`Deleted connection requests for user: ${userId}`);
+    next();
+  } catch(err) {
+    next(err);
+  }
+});
+
+userSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+  try {
+    const ConnectionRequest = require('./connectionRequest');
+    
+    // Delete all connection requests involving this user
+    await ConnectionRequest.deleteMany({
+      $or: [
+        { fromUserId: this._id },
+        { toUserId: this._id }
+      ]
+    });
+    
+    console.log(`Deleted connection requests for user: ${this._id}`);
+    next();
+  } catch(err) {
+    next(err);
+  }
+});
+
 module.exports = mongoose.model("user", userSchema);

@@ -17,9 +17,12 @@ userRouter.get("/user/requests/received",userauth,async(req,res)=>{
     }).populate("fromUserId",USER_SAFE_DATA ); 
     // }).populate("fromUserId",["firstName","lastName"]);
 
+    // Filter out requests where the sender user was deleted
+    const validRequests = connectionRequests.filter(request => request.fromUserId);
+
     res.json({
         message:"data fetched succesfully",
-        data:connectionRequests,
+        data:validRequests,
     });
   }catch(err){
     res.status(400).send("ERROR : " + err.message);
@@ -38,13 +41,18 @@ userRouter.get("/user/connections",userauth,async(req,res)=>{
               .populate("toUserId", USER_SAFE_DATA);
 
 
-        const data = connectionRequests.map((row)=>{
-            if(row.fromUserId._id.toString() === loggedInUser._id.toString()){
-                return row.toUserId;
-            }else{
-                return row.fromUserId;
-            }
-        });
+        const data = connectionRequests
+            .filter((row)=>{
+                // Filter out connections where either user was deleted
+                return row.fromUserId && row.toUserId;
+            })
+            .map((row)=>{
+                if(row.fromUserId._id.toString() === loggedInUser._id.toString()){
+                    return row.toUserId;
+                }else{
+                    return row.fromUserId;
+                }
+            });
         res.json({
             data,
         });
